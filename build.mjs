@@ -75,7 +75,11 @@ const reviews = readJson('data/reviews.json');
 const blog = readJson('data/blog.json');
 const kwMax = Math.max(1, ...(reviews?.keywords || []).map(k => k.count));
 const telHref = 'tel:' + r.phone.replace(/[^0-9+]/g, '');
-const glaze = `url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .78 0 0 0 0 .62 0 0 0 0 .46 0 0 0 .16 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')}")`;
+// 24절기 (양력 기준 대략 날짜, 하루 정도 어긋날 수 있음)
+const TERMS = [[1,5,'소한','小寒'],[1,20,'대한','大寒'],[2,4,'입춘','立春'],[2,19,'우수','雨水'],[3,5,'경칩','驚蟄'],[3,20,'춘분','春分'],[4,5,'청명','淸明'],[4,20,'곡우','穀雨'],[5,5,'입하','立夏'],[5,21,'소만','小滿'],[6,6,'망종','芒種'],[6,21,'하지','夏至'],[7,7,'소서','小暑'],[7,22,'대서','大暑'],[8,7,'입추','立秋'],[8,23,'처서','處暑'],[9,7,'백로','白露'],[9,23,'추분','秋分'],[10,8,'한로','寒露'],[10,23,'상강','霜降'],[11,7,'입동','立冬'],[11,22,'소설','小雪'],[12,7,'대설','大雪'],[12,21,'동지','冬至']];
+const termOf = (m, d) => [...TERMS].reverse().find(([tm, td]) => m > tm || (m === tm && d >= td)) || TERMS.at(-1);
+const seoulNow = new Date(Date.now() + 9 * 3600e3);
+const term = termOf(seoulNow.getUTCMonth() + 1, seoulNow.getUTCDate());
 const plus = '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
 
 const html = `<!doctype html>
@@ -97,6 +101,7 @@ ${r.site.googleVerification ? `<meta name="google-site-verification" content="${
 ${r.site.ogImage ? `<meta property="og:image" content="${esc(r.site.ogImage)}">` : ''}
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>
+<link rel="preload" as="image" href="images/bowl.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
@@ -115,38 +120,27 @@ ${r.site.ogImage ? `<meta property="og:image" content="${esc(r.site.ogImage)}">`
 }
 *{box-sizing:border-box}
 html{scrollbar-color:var(--glaze) var(--onggi)}
-body{margin:0;background:var(--onggi) ${glaze};color:var(--on-onggi);font:17px/1.7 var(--sans);word-break:keep-all;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--onggi) url(images/grain.jpg) 0 0/320px auto;color:var(--on-onggi);font:17px/1.7 var(--sans);word-break:keep-all;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--seal);color:var(--on-seal)}
 a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
 :focus-visible{outline:2px solid var(--broth);outline-offset:3px;border-radius:4px}
 .wrap{max-width:1120px;margin:0 auto;padding:0 var(--s4)}
 
-/* 첫 화면: 위에서 내려다본 뚝배기 한 그릇 */
-.hero{display:grid;gap:var(--s6);padding:var(--s8) 0 var(--s8);align-items:center}
-.bowl-wrap{position:relative;justify-self:center;width:min(92vw,62vh,560px);aspect-ratio:1}
-.bowl{position:absolute;inset:0;border-radius:50%;background:var(--rim);
-  box-shadow:0 18px 40px rgba(0,0,0,.55),0 2px 0 rgba(255,255,255,.04) inset;
-  display:grid;place-items:center}
-.bowl::before{content:"";position:absolute;inset:3.2%;border-radius:50%;border:1px solid var(--glaze);opacity:.7}
-.broth{position:relative;width:86%;aspect-ratio:1;border-radius:50%;
-  background:radial-gradient(circle at 42% 38%,#f8f4ec 0%,var(--broth) 45%,var(--broth-deep) 100%);
-  box-shadow:inset 0 10px 28px rgba(0,0,0,.24);
-  color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12%}
-.hanja{font-family:var(--brush);font-size:clamp(64px,19vw,128px);line-height:1;margin:0;letter-spacing:.02em;color:#120c08}
-h1{font-family:var(--batang);font-weight:700;font-size:clamp(20px,5.2vw,26px);margin:var(--s3) 0 0;letter-spacing:.24em;padding-left:.24em}
-.kind{margin:var(--s1) 0 0;font-size:15px;color:var(--ink-soft)}
-.status{margin:var(--s4) 0 0;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:var(--s2);color:var(--ink)}
-.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ink-soft)}
-.status[data-open="1"]::before{background:#2f7d4a;box-shadow:0 0 0 3px rgba(47,125,74,.18)}
-.seal{position:absolute;right:4%;bottom:7%;width:clamp(52px,14vw,74px);aspect-ratio:1;background:var(--seal);color:var(--on-seal);
-  border-radius:6px;transform:rotate(-6deg);display:grid;place-items:center;font-family:var(--batang);font-weight:700;
-  font-size:clamp(13px,3.4vw,17px);line-height:1.05;writing-mode:vertical-rl;letter-spacing:.06em;box-shadow:0 6px 14px rgba(0,0,0,.35)}
-.steam{position:absolute;left:50%;top:-14%;width:34%;transform:translateX(-50%);overflow:visible;pointer-events:none}
-.steam path{fill:none;stroke:var(--broth);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:160;stroke-dashoffset:160;opacity:0;
-  animation:steam 2.8s var(--ease) .4s forwards}
-.steam path:nth-child(2){animation-delay:.75s}.steam path:nth-child(3){animation-delay:1.1s}
-@keyframes steam{0%{stroke-dashoffset:160;opacity:0}35%{opacity:.75}100%{stroke-dashoffset:0;opacity:.28}}
-@media (prefers-reduced-motion:reduce){.steam path{animation:none;stroke-dashoffset:0;opacity:.28}}
+/* 첫 화면: 매장 설렁탕 한 그릇을 위에서 본 사진 + 세로 붓글씨 상호 */
+.hero{display:grid;gap:var(--s6);padding:var(--s7) 0 var(--s8);align-items:center}
+.plate{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:var(--s2)}
+.hanja{font-family:var(--brush);line-height:1;margin:0}
+.plate .hanja{writing-mode:vertical-rl;font-size:clamp(56px,16vw,96px);letter-spacing:.06em;color:var(--on-onggi)}
+.bowl{display:block;width:100%;height:auto;filter:drop-shadow(0 22px 30px rgba(0,0,0,.6))}
+.season{margin:0;display:flex;align-items:center;gap:var(--s3);font-family:var(--batang);font-size:15px;color:var(--on-onggi-soft);letter-spacing:.08em}
+.season::before{content:"";width:28px;height:1px;background:var(--on-onggi-soft)}
+.season b{color:var(--on-onggi);font-weight:700}
+h1{font-family:var(--batang);font-weight:700;font-size:clamp(28px,7vw,36px);margin:0;letter-spacing:.2em}
+.kind{margin:0;font-size:15px;color:var(--on-onggi-soft)}
+.status{margin:0;font-size:15px;font-weight:600;display:inline-flex;align-items:center;gap:var(--s2)}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--on-onggi-soft)}
+.status[data-open="1"]::before{background:#57b979;box-shadow:0 0 0 3px rgba(87,185,121,.22)}
+.name{display:grid;gap:var(--s2);justify-items:inherit}
 
 .go{display:grid;gap:var(--s4);justify-items:center;text-align:center}
 .tagline{font-family:var(--batang);font-size:clamp(22px,5.6vw,34px);line-height:1.35;margin:0;max-width:16em;text-wrap:balance}
@@ -165,8 +159,8 @@ h1{font-family:var(--batang);font-weight:700;font-size:clamp(20px,5.2vw,26px);ma
 
 @media (min-width:900px){
   .hero{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);min-height:88vh;padding:var(--s8) 0}
-  .bowl-wrap{justify-self:start;width:min(46vw,76vh,620px)}
-  .hanja{font-size:clamp(96px,9vw,140px)}
+  .plate{width:min(100%,82vh,640px)}
+  .plate .hanja{font-size:clamp(88px,8vw,120px)}
   .go{justify-items:start;text-align:left;padding-left:var(--s5)}
   .tagline{font-size:clamp(30px,3vw,40px)}
 }
@@ -257,22 +251,18 @@ footer a{color:var(--on-onggi)}
 <main class="wrap">
 
 <header class="hero">
-<div class="bowl-wrap">
-<svg class="steam" viewBox="0 0 120 80" aria-hidden="true">
-<path d="M40 78c-8-12 8-20 0-34s6-22 2-40"/><path d="M62 78c-9-14 9-22 1-37s5-20 1-38"/><path d="M84 78c-8-12 7-19 0-32s5-21 2-38"/>
-</svg>
-<div class="bowl">
-<div class="broth">
+<div class="plate">
 <p class="hanja" lang="zh-Hant" aria-hidden="true">${esc(hanja)}</p>
+<img class="bowl" src="images/bowl.webp" alt="${esc(r.name)} 설렁탕 한 그릇을 위에서 본 모습" width="939" height="908" fetchpriority="high" decoding="async">
+</div>
+
+<div class="go">
+<div class="name">
+<p class="season" id="season"><span>절기</span><b>${term[2]}</b><span lang="zh-Hant">${term[3]}</span></p>
 <h1>${esc(r.name)}</h1>
 <p class="kind">${esc(r.servesCuisine.slice(1, 3).join("·"))} 전문점</p>
 <p class="status" id="status">${esc(hoursText.join(' / '))}</p>
 </div>
-</div>
-<div class="seal" aria-hidden="true">${esc(r.name)}</div>
-</div>
-
-<div class="go">
 <p class="tagline">${esc(r.tagline)}</p>
 <p class="addr">${esc(r.area)} · ${esc(fullAddr)}</p>
 <div class="maps">
@@ -359,6 +349,9 @@ ${r.faq.map(f => `<details><summary>${esc(f.q)}${plus}</summary><p>${esc(f.a)}</
   else if (now < today[0][0]) t = '영업 전 · ' + today[0][0] + ' 열어요';
   else { const later = today.find(([o]) => now < o); t = later ? '브레이크타임 · ' + later[0] + ' 다시 열어요' : '오늘 영업 끝 · ' + next() + ' 열어요'; }
   el.textContent = t;
+  const TERMS = ${JSON.stringify(TERMS)}, m = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', month: 'numeric' }).format(new Date()), d = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', day: 'numeric' }).format(new Date());
+  const tm = [...TERMS].reverse().find(([a, b]) => m > a || (m === a && d >= b)) || TERMS.at(-1), se = document.getElementById('season');
+  if (se) { se.children[1].textContent = tm[2]; se.children[2].textContent = tm[3]; }
 })();
 </script>
 </body>
