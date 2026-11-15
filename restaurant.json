@@ -124,7 +124,8 @@
         {
           "name": "차돌미니수육",
           "price": 16000,
-          "description": "차돌박이로만 구성한 촉촉하고 부드러운 미니 수육."
+          "description": "차돌박이로만 구성한 촉촉하고 부드러운 미니 수육.",
+          "photo": "images/chadol.jpg"
         },
         {
           "name": "모둠수육 (2~3인)",

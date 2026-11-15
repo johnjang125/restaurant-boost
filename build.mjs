@@ -166,9 +166,9 @@ h1{font-family:var(--batang);font-weight:700;font-size:clamp(20px,5.2vw,26px);ma
 .dishes::-webkit-scrollbar{display:none}
 .dishes li{scroll-snap-align:start}
 .dishes img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--broth)}
-.dishes p{margin:var(--s3) 0 0;display:flex;justify-content:space-between;gap:var(--s3);font-weight:600}
+.dishes p{margin:var(--s3) 0 0;display:flex;flex-direction:column;gap:2px;font-weight:600;line-height:1.4}
 .dishes span{font-variant-numeric:tabular-nums;color:var(--on-onggi-soft);font-weight:500}
-@media (min-width:900px){.dishes{grid-auto-flow:row;grid-template-columns:repeat(5,1fr);margin:0 0 var(--s7);padding:0;overflow:visible}}
+@media (min-width:900px){.dishes{grid-auto-flow:row;grid-template-columns:repeat(${Math.max(dishes.length,1)},minmax(0,1fr));margin:0 0 var(--s7);padding:0;overflow:visible}}
 .story{display:block;width:100%;height:auto;border-radius:10px;margin:var(--s6) 0 0}
 
 /* 본문 */
