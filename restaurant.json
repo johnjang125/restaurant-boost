@@ -96,6 +96,12 @@
     "콜키지 가능",
     "제로페이·간편결제"
   ],
+  "awards": [
+    {
+      "title": "2026 한국소비자산업평가 외식업 · 서울특별시 광진구 국/국밥 부문 우수",
+      "image": "images/award-2026.jpg"
+    }
+  ],
   "menu": [
     {
       "section": "탕",
@@ -264,6 +270,7 @@
     "url": "https://johnjang125.github.io/restaurant-boost/",
     "ogImage": "https://johnjang125.github.io/restaurant-boost/images/og.jpg",
     "naverVerification": "",
-    "googleVerification": ""
+    "googleVerification": "",
+    "storyImage": "images/table.jpg"
   }
 }
