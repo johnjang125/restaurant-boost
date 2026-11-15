@@ -55,6 +55,16 @@ node scripts/instagram-post.mjs posts/2026-11-15.json
 node scripts/instagram-post.mjs posts/2026-11-15.json --publish
 ```
 
+## 손님 후기 (네이버)
+
+홈페이지 "손님 후기"는 매주 월요일 아침 자동으로 새로 만들어집니다 (GitHub Actions).
+
+- **방문자 리뷰** — `scripts/fetch-place-reviews.mjs`가 네이버 플레이스 공개 페이지에서 리뷰 수, 키워드 순위, 최근 리뷰 몇 개의 첫 줄(80자까지)을 가져옵니다. 닉네임은 가리고, 전체 리뷰는 네이버 링크로 보냅니다.
+  - 네이버가 허락한 방법(API)이 아니라서 네이버 약관에 어긋나고, 네이버 화면이 바뀌면 멈출 수 있습니다. 실패하면 마지막으로 저장된 `data/reviews.json`을 그대로 씁니다.
+  - 리뷰 글은 쓴 사람의 저작물입니다. 전문을 옮기지 말고, 리뷰 작성자가 삭제를 요청하면 바로 빼 주세요.
+  - 손으로 새로 고치려면 `node scripts/fetch-place-reviews.mjs` 실행 후 `data/reviews.json`을 커밋.
+- **블로그 후기** — `scripts/fetch-blog.mjs`가 네이버 공식 검색 API로 블로그 글 제목·작성자·날짜·링크를 가져옵니다. developers.naver.com에서 "검색" API를 등록하고, 저장소 Settings → Secrets and variables → Actions에 `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`을 넣으면 켜집니다.
+
 ## AI 연결
 
 지금은 대시보드 "AI로 다듬기" 요청문을 ChatGPT·Claude에 붙여 넣는 방식이라 설정이 필요 없습니다. 자동화하려면 `scripts/ai.mjs`의 `generate()`를 채우세요.

@@ -11,6 +11,7 @@
     "수육"
   ],
   "tagline": "한우뼈로 매일 12시간 끓인 사골 설렁탕·도가니탕",
+  "taglineEn": "Seolleongtang (beef bone soup) and dogani-tang (beef knee soup), simmered 12 hours daily.",
   "description": "세종대 후문에 있는 설렁탕·도가니탕 전문점입니다. 100% 한우뼈로 매일 12시간 이상 직접 사골국물을 우려내고, 부드러운 고기와 쫄깃한 도가니를 듬뿍 담습니다. 김치·석박지와 쌀은 국내산을 씁니다.",
   "seo": {
     "title": "강설옥 | 세종대 후문 설렁탕·도가니탕 (군자동)",
@@ -27,6 +28,24 @@
   },
   "area": "세종대 후문",
   "directions": "세종대 후문, 송정군자새마을금고 본점 맞은편. 어린이대공원역(7호선) 5번 출구 도보 11분, 군자역(5·7호선) 8번 출구 도보 14분. 버스 2012·2016·240 '군자새마을금고.성동광진위센터' 정류장 하차 도보 1분.",
+  "transit": [
+    {
+      "label": "위치",
+      "text": "세종대 후문, 송정군자새마을금고 본점 맞은편"
+    },
+    {
+      "label": "지하철",
+      "text": "어린이대공원역(7호선) 5번 출구 도보 11분 · 군자역(5·7호선) 8번 출구 도보 14분"
+    },
+    {
+      "label": "버스",
+      "text": "2012·2016·240번 '군자새마을금고.성동광진위센터' 하차, 도보 1분"
+    },
+    {
+      "label": "주차",
+      "text": "전용 주차장 없음 · 모두의주차장 '구획군자_181'(도보 6분), 세종대 후문 주차장(도보 5분)"
+    }
+  ],
   "geo": {
     "lat": 37.5517197,
     "lng": 127.0713341
@@ -245,7 +264,6 @@
     "url": "https://johnjang125.github.io/restaurant-boost/",
     "ogImage": "https://johnjang125.github.io/restaurant-boost/images/og.jpg",
     "naverVerification": "",
-    "googleVerification": "",
-    "storyImage": "images/table.jpg"
+    "googleVerification": ""
   }
 }
