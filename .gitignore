@@ -1,0 +1,4 @@
+.env
+/site/
+/posts/
+node_modules/

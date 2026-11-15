@@ -1,0 +1,68 @@
+{
+  "_안내": "가게 정보는 이 파일 하나만 고치면 홈페이지·구조화 데이터·대시보드에 모두 반영됩니다. 아래는 예시 값입니다.",
+  "name": "예시 국밥집",
+  "nameEn": "Example Gukbap",
+  "category": "국밥",
+  "servesCuisine": ["한식", "국밥"],
+  "tagline": "새벽부터 12시간 끓인 사골 국밥",
+  "description": "OO역 2번 출구 앞, 12시간 끓인 사골 육수로 만드는 국밥집입니다. 혼밥 좌석과 단체석이 있고 포장도 됩니다.",
+  "seo": {
+    "title": "예시 국밥집 | OO역 국밥 맛집",
+    "description": "OO역 2번 출구 1분, 12시간 사골 국밥. 혼밥석·단체석·포장 가능. 매일 10시~21시."
+  },
+  "priceRange": "₩₩",
+  "phone": "02-000-0000",
+  "address": {
+    "street": "OO로 00, 1층",
+    "locality": "OO구",
+    "region": "서울특별시",
+    "postalCode": "00000",
+    "country": "KR"
+  },
+  "area": "OO역",
+  "directions": "OO역 2번 출구에서 직진 50m, 편의점 옆 1층",
+  "geo": { "lat": 37.5665, "lng": 126.978 },
+  "hours": [
+    { "days": ["Mo", "Tu", "We", "Th", "Fr"], "open": "10:00", "close": "21:00" },
+    { "days": ["Sa"], "open": "10:00", "close": "20:00" }
+  ],
+  "hoursNote": "일요일 휴무 · 브레이크타임 15:00~16:30",
+  "features": ["혼밥 좌석", "단체석 20석", "포장 가능", "주차 2대"],
+  "menu": [
+    {
+      "section": "대표 메뉴",
+      "items": [
+        { "name": "사골 국밥", "price": 9000, "description": "12시간 끓인 사골 육수에 수육을 듬뿍", "signature": true },
+        { "name": "얼큰 국밥", "price": 9500, "description": "청양고추 다대기로 칼칼하게" }
+      ]
+    },
+    {
+      "section": "곁들임",
+      "items": [
+        { "name": "수육 (소)", "price": 18000, "description": "2인이 나눠 먹기 좋은 양" },
+        { "name": "만두 (6알)", "price": 6000, "description": "매장에서 빚은 고기만두" }
+      ]
+    }
+  ],
+  "keywords": ["OO역 맛집", "OO역 국밥", "OO구 국밥", "OO역 혼밥", "OO역 점심"],
+  "faq": [
+    { "q": "주차할 수 있나요?", "a": "가게 앞에 2대 주차할 수 있습니다. 만차일 때는 근처 공영주차장(도보 3분)을 이용해 주세요." },
+    { "q": "혼자 가도 되나요?", "a": "네, 혼밥 좌석 6석이 따로 있습니다." },
+    { "q": "포장되나요?", "a": "모든 국밥은 포장됩니다. 전화로 미리 주문하시면 기다리지 않고 받아 가실 수 있습니다." },
+    { "q": "단체 예약 되나요?", "a": "20명까지 단체석 예약을 받습니다. 하루 전까지 전화 주세요." },
+    { "q": "브레이크타임이 있나요?", "a": "평일과 토요일 모두 15:00~16:30은 브레이크타임입니다." }
+  ],
+  "links": {
+    "naverPlace": "",
+    "kakaoMap": "",
+    "googleMaps": "",
+    "instagram": "",
+    "naverBlog": ""
+  },
+  "site": {
+    "url": "https://johnjang125.github.io/restaurant-boost/",
+    "ogImage": "",
+    "naverVerification": "",
+    "googleVerification": ""
+  }
+}

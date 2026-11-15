@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>노출 관리 대시보드</title>
+<style>
+:root{--bg:#f6f5f2;--ink:#22201d;--muted:#6b665f;--line:#e2ded7;--card:#fff;--accent:#b4441f;--ok:#2f7d4a;--warn:#b07b12;--bad:#b3261e;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--radius:10px}
+@media (prefers-color-scheme:dark){:root{--bg:#181715;--ink:#eeeae4;--muted:#aaa39a;--line:#36322d;--card:#22201d;--accent:#f08a5d;--ok:#6cc48a;--warn:#e0b14a;--bad:#f2867e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;word-break:keep-all}
+.wrap{max-width:860px;margin:0 auto;padding:var(--space-4)}
+h1{font-size:20px;margin:var(--space-2) 0}
+h2{font-size:17px;margin:var(--space-6) 0 var(--space-3)}
+.sub{color:var(--muted);margin:0}
+nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin:var(--space-4) 0}
+nav button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 12px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:var(--space-4);margin-bottom:var(--space-3)}
+.score{font-size:40px;font-weight:700;font-variant-numeric:tabular-nums}
+.row{display:flex;gap:var(--space-3);align-items:flex-start;padding:6px 0}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:7px}
+.ok{background:var(--ok)}.warn{background:var(--warn)}.bad{background:var(--bad)}
+label.chk{display:flex;gap:var(--space-2);align-items:flex-start;padding:6px 0;cursor:pointer}
+label.chk input{margin-top:5px}
+.hint{color:var(--muted);font-size:13px}
+select,textarea,input[type=text]{font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
+textarea{min-height:200px;resize:vertical}
+.grid{display:grid;gap:var(--space-3);grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+button.b{font:inherit;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.b.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btns{display:flex;flex-wrap:wrap;gap:var(--space-2);margin-top:var(--space-2)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td a{color:var(--accent);margin-right:8px;white-space:nowrap}
+.scroll{overflow-x:auto}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1 id="title">노출 관리</h1>
+<p class="sub">체크와 기록은 이 브라우저에만 저장됩니다. 가게 정보를 바꾸려면 <code>restaurant.json</code>을 고치세요.</p>
+
+<nav role="tablist">
+<button role="tab" data-tab="audit" aria-selected="true">점검</button>
+<button role="tab" data-tab="platform">플랫폼 할 일</button>
+<button role="tab" data-tab="content">글 만들기</button>
+<button role="tab" data-tab="ai">AI 노출 기록</button>
+<button role="tab" data-tab="nap">정보 복사</button>
+</nav>
+
+<section id="audit" role="tabpanel">
+<div class="card"><div class="score" id="score">-</div><div class="hint">가게 정보 완성도 (restaurant.json 기준)</div></div>
+<div class="card" id="checks"></div>
+</section>
+
+<section id="platform" role="tabpanel" hidden>
+<p class="hint">플랫폼 관리 화면은 공개 API가 없거나 승인이 필요해서 사장님이 직접 해야 합니다. 끝낸 항목에 체크하세요.</p>
+<div id="todo"></div>
+</section>
+
+<section id="content" role="tabpanel" hidden>
+<div class="card grid">
+<label>메뉴<select id="cItem"></select></label>
+<label>주제<select id="cTopic">
+<option value="sig">대표 메뉴 소개</option>
+<option value="new">신메뉴 출시</option>
+<option value="today">오늘의 한 그릇</option>
+<option value="event">이벤트·공지</option>
+<option value="season">계절 메뉴</option>
+</select></label>
+<label>한 줄 메모 (선택)<input type="text" id="cNote" placeholder="예: 이번 주 수육 10% 할인"></label>
+</div>
+<h2>인스타그램 캡션</h2>
+<textarea id="igOut"></textarea>
+<div class="btns">
+<button class="b" data-copy="igOut">복사</button>
+<button class="b" id="igFile">게시 파일 받기 (scripts/instagram-post.mjs용)</button>
+</div>
+<h2>네이버 블로그 초안</h2>
+<textarea id="blogOut" style="min-height:320px"></textarea>
+<div class="btns"><button class="b" data-copy="blogOut">복사</button></div>
+<h2>AI로 다듬기</h2>
+<p class="hint">아래 요청문을 복사해 ChatGPT·Claude·Gemini에 붙여 넣으면 자연스러운 글로 바꿔 줍니다. API 연결 없이 바로 쓸 수 있습니다.</p>
+<textarea id="aiOut"></textarea>
+<div class="btns"><button class="b primary" data-copy="aiOut">요청문 복사</button></div>
+</section>
+
+<section id="ai" role="tabpanel" hidden>
+<p class="hint">손님이 AI나 검색창에 물어볼 만한 질문입니다. 링크로 열어 보고, 우리 가게가 답에 나오면 체크한 뒤 저장하세요. 한 달에 한두 번이면 충분합니다.</p>
+<div class="card scroll"><table id="aiTable"></table></div>
+<div class="btns"><button class="b primary" id="aiSave">오늘 결과 저장</button></div>
+<h2>지난 기록</h2>
+<div class="card scroll"><table id="aiHist"></table></div>
+</section>
+
+<section id="nap" role="tabpanel" hidden>
+<p class="hint">상호·주소·전화(NAP)가 모든 플랫폼에서 글자 하나까지 같아야 검색엔진과 AI가 같은 가게로 묶어 줍니다. 아래 문구를 그대로 붙여 넣으세요.</p>
+<div id="napList"></div>
+</section>
+</div>
+
+<script>
+const KEY = 'restaurant-boost-v1';
+const S = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })();
+S.todo ??= {}; S.aiLog ??= [];
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const won = n => n.toLocaleString('ko-KR') + '원';
+
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('nav button').forEach(x => x.setAttribute('aria-selected', x === b));
+  document.querySelectorAll('[role=tabpanel]').forEach(p => p.hidden = p.id !== b.dataset.tab);
+});
+document.addEventListener('click', e => {
+  const id = e.target.dataset?.copy; if (!id) return;
+  navigator.clipboard.writeText($(id).value).then(() => { e.target.textContent = '복사됨'; setTimeout(() => e.target.textContent = '복사', 1200); });
+});
+
+const TODO = {
+  '네이버 플레이스 (스마트플레이스)': [
+    '스마트플레이스(new.smartplace.naver.com)에서 업체 등록·소유 확인',
+    '상호·주소·전화를 "정보 복사" 탭 문구와 똑같이 입력',
+    '영업시간·휴무일·브레이크타임 입력',
+    '메뉴 전부 가격과 사진까지 등록 (대표 메뉴 표시)',
+    '가게 사진 20장 이상 (외관·내부·메뉴), 첫 사진은 대표 메뉴',
+    '소개글에 지역+메뉴 키워드를 자연스럽게 넣기',
+    '편의시설(주차·단체석·포장) 체크',
+    '네이버 예약·스마트주문 켜기 (쓰는 경우)',
+    '"소식" 메뉴에 주 1회 글 올리기',
+    '영수증 리뷰 요청 안내문을 계산대에 두기, 리뷰에 답글 달기',
+  ],
+  '네이버 검색 (서치어드바이저)': [
+    'searchadvisor.naver.com에 홈페이지 등록',
+    '소유 확인 코드를 restaurant.json site.naverVerification에 넣기',
+    'sitemap.xml 제출, robots.txt 확인',
+    '네이버 블로그 개설 후 월 2회 이상 글 (글 만들기 탭 초안 활용)',
+  ],
+  '구글 비즈니스 프로필 / 구글 지도': [
+    'business.google.com에서 업체 등록·소유 확인 (우편·전화·영상)',
+    '카테고리 "한식당" 등 정확히 선택, 영업시간·메뉴·사진 등록',
+    '영어 상호(nameEn)도 함께 등록 — 외국인 관광객 검색 대비',
+    'Search Console에 홈페이지 등록, 코드를 site.googleVerification에 넣기',
+    '구글 리뷰 요청 QR 만들어 두기, 리뷰 답글 달기',
+    '구글 지도 링크를 restaurant.json links.googleMaps에 넣기',
+  ],
+  '카카오맵': [
+    '카카오맵 장소 등록·정보 수정 요청 (카카오 비즈니스 → 장소 관리)',
+    '사진·메뉴·영업시간 등록',
+  ],
+  '인스타그램': [
+    '비즈니스(또는 크리에이터) 계정으로 전환',
+    '프로필에 주소·전화·홈페이지 링크, 위치 태그 설정',
+    '게시물마다 위치 태그 + 지역·메뉴 해시태그',
+    '자동 게시를 쓰려면 Meta 개발자 앱 만들고 토큰 발급 (README 참고)',
+  ],
+  'AI 검색 (GEO·AEO)': [
+    '홈페이지 FAQ를 실제 손님 질문으로 5~10개 채우기',
+    '모든 플랫폼에서 상호·주소·전화 완전히 동일하게',
+    '"AI 노출 기록" 탭에서 한 달에 한 번 확인',
+    '지역 매체·블로거 후기 링크 모으기 (AI가 인용하는 출처가 됨)',
+  ],
+};
+
+fetch('../data/restaurant.json').then(r => r.json()).then(init).catch(() => {
+  document.querySelector('.wrap').insertAdjacentHTML('beforeend', '<p class="card">data/restaurant.json을 못 읽었습니다. node build.mjs로 만든 site/ 폴더에서 열어 주세요.</p>');
+});
+
+function init(R) {
+  $('title').textContent = R.name + ' 노출 관리';
+  const items = R.menu.flatMap(s => s.items);
+  const addr = `${R.address.region} ${R.address.locality} ${R.address.street}`;
+
+  // 점검
+  const checks = [
+    [R.seo.description.length <= 80, `검색 설명 ${R.seo.description.length}자`, '네이버는 80자 이하 권장'],
+    [R.faq.length >= 5, `FAQ ${R.faq.length}개`, '5개 이상이면 AI 답변·구글 FAQ에 쓰이기 쉬움'],
+    [items.every(i => i.price), `메뉴 ${items.length}개 모두 가격 있음`, '가격이 있어야 AI가 "얼마예요?"에 답함'],
+    [items.length >= 4, `메뉴 ${items.length}개`, '4개 이상 권장'],
+    [R.keywords.length >= 5, `키워드 ${R.keywords.length}개`, '"지역+메뉴" 조합 5개 이상'],
+    [!!R.site.ogImage, '공유 이미지(ogImage)', '카톡·인스타 링크 미리보기용 1200×630 사진'],
+    [!!R.site.naverVerification, '네이버 서치어드바이저 연결', ''],
+    [!!R.site.googleVerification, '구글 서치콘솔 연결', ''],
+    ...Object.entries({ naverPlace: '네이버 플레이스', kakaoMap: '카카오맵', googleMaps: '구글 지도', instagram: '인스타그램', naverBlog: '네이버 블로그' })
+      .map(([k, t]) => [!!R.links[k], `${t} 링크`, 'restaurant.json links에 넣으면 구조화 데이터 sameAs로 연결됨']),
+  ];
+  const done = checks.filter(c => c[0]).length;
+  $('score').textContent = Math.round(done / checks.length * 100) + '점';
+  $('checks').innerHTML = checks.map(([ok, t, h]) => `<div class="row"><span class="dot ${ok ? 'ok' : 'bad'}"></span><div>${esc(t)}${!ok && h ? `<div class="hint">${esc(h)}</div>` : ''}</div></div>`).join('');
+
+  // 플랫폼 할 일
+  const renderTodo = () => $('todo').innerHTML = Object.entries(TODO).map(([g, list]) => {
+    const n = list.filter((_, i) => S.todo[g + i]).length;
+    return `<div class="card"><h2 style="margin-top:0">${esc(g)} <span class="hint">${n}/${list.length}</span></h2>${list.map((t, i) => `<label class="chk"><input type="checkbox" data-k="${esc(g + i)}" ${S.todo[g + i] ? 'checked' : ''}><span>${esc(t)}</span></label>`).join('')}</div>`;
+  }).join('');
+  renderTodo();
+  $('todo').onchange = e => { S.todo[e.target.dataset.k] = e.target.checked; save(); renderTodo(); };
+
+  // 글 만들기
+  if (!$('cItem').options.length) {
+    $('cItem').innerHTML = items.map((i, k) => `<option value="${k}">${esc(i.name)}</option>`).join('');
+    const sig = items.findIndex(i => i.signature); if (sig >= 0) $('cItem').value = sig;
+  }
+  const tag = s => '#' + s.replace(/\s+/g, '');
+  const gen = () => {
+    const it = items[$('cItem').value], topic = $('cTopic').value, note = $('cNote').value.trim();
+    const head = { sig: `${R.area}에서 ${R.category} 찾으면 여기 🍲`, new: `신메뉴 나왔어요! ${it.name}`, today: `오늘의 한 그릇, ${it.name}`, event: note || `${R.name} 소식`, season: `이 계절에만, ${it.name}` }[topic];
+    const tags = [...R.keywords, R.name, it.name, R.area + '맛집', R.address.locality + '맛집'].map(tag);
+    $('igOut').value = `${head}\n\n${it.name} ${won(it.price)}\n${it.description || ''}\n${note && topic !== 'event' ? '\n' + note + '\n' : ''}\n📍 ${addr}\n🕘 ${R.hours.map(h => h.open + '~' + h.close).join(' / ')} (${R.hoursNote})\n📞 ${R.phone}\n\n${[...new Set(tags)].join(' ')}`;
+    $('blogOut').value = `제목: [${R.area} ${R.category}] ${R.name} ${it.name} — ${R.tagline}\n\n` +
+      `■ 가게 소개\n${R.description}\n\n` +
+      `■ 위치·찾아오기\n주소: ${addr}\n${R.directions}\n지도: ${R.links.naverPlace || '(네이버 플레이스 링크)'}\n\n` +
+      `■ 오늘 소개할 메뉴: ${it.name} (${won(it.price)})\n${it.description || ''}\n${note ? note + '\n' : ''}[사진 3~5장: 메뉴 전체 → 가까이 → 먹는 장면]\n\n` +
+      `■ 전체 메뉴\n${R.menu.map(s => s.section + '\n' + s.items.map(i => `- ${i.name} ${won(i.price)}`).join('\n')).join('\n')}\n\n` +
+      `■ 영업시간\n${R.hours.map(h => h.days.join('·') + ' ' + h.open + '~' + h.close).join('\n')}\n${R.hoursNote}\n\n` +
+      `■ 자주 묻는 질문\n${R.faq.map(f => `Q. ${f.q}\nA. ${f.a}`).join('\n\n')}\n\n` +
+      `태그: ${R.keywords.join(', ')}`;
+    $('aiOut').value = `아래 식당 정보로 ${topic === 'event' ? '공지' : '홍보'}글을 써 줘.\n` +
+      `1) 인스타그램 캡션: 300자 이내, 첫 줄에 눈길 끄는 문장, 해시태그 10개 이내\n2) 네이버 블로그 글: 1,500자 안팎, 사장님 1인칭, 소제목 4개, 위치·가격·영업시간 포함\n` +
+      `규칙: 아래 정보에 없는 사실(수상, 방송 출연, "최고" 같은 비교)은 지어내지 말 것. 과장 광고 표현 금지.\n\n` +
+      `가게: ${R.name} (${R.category}, ${R.area})\n소개: ${R.description}\n주소: ${addr}\n영업: ${R.hours.map(h => h.days.join('·') + ' ' + h.open + '~' + h.close).join(', ')} / ${R.hoursNote}\n` +
+      `특징: ${R.features.join(', ')}\n주제 메뉴: ${it.name} ${won(it.price)} — ${it.description || ''}\n${note ? '메모: ' + note + '\n' : ''}키워드: ${R.keywords.join(', ')}`;
+  };
+  ['cItem', 'cTopic', 'cNote'].forEach(id => $(id).oninput = gen);
+  gen();
+  $('igFile').onclick = () => {
+    const d = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([JSON.stringify({ image: `posts/${d}.jpg`, caption: $('igOut').value }, null, 2)], { type: 'application/json' });
+    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `${d}.json` });
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+
+  // AI 노출 기록
+  const qs = [...new Set([
+    ...R.keywords.map(k => k + ' 추천'),
+    `${R.area} ${R.category} 어디가 맛있어?`,
+    `${R.address.locality} 혼밥하기 좋은 식당`,
+    `${R.name} 영업시간`,
+    `${R.name} 메뉴 가격`,
+  ])];
+  const ENG = [
+    ['ChatGPT', q => 'https://chatgpt.com/?q=' + encodeURIComponent(q)],
+    ['Perplexity', q => 'https://www.perplexity.ai/search?q=' + encodeURIComponent(q)],
+    ['구글', q => 'https://www.google.com/search?q=' + encodeURIComponent(q)],
+    ['네이버', q => 'https://search.naver.com/search.naver?query=' + encodeURIComponent(q)],
+  ];
+  $('aiTable').innerHTML = `<tr><th>질문</th>${ENG.map(e => `<th>${e[0]}</th>`).join('')}</tr>` +
+    qs.map((q, i) => `<tr><td>${esc(q)}</td>${ENG.map(([n, u], j) => `<td><a href="${esc(u(q))}" target="_blank" rel="noopener">열기</a><label><input type="checkbox" data-q="${i}" data-e="${j}"> 나옴</label></td>`).join('')}</tr>`).join('');
+  const renderHist = () => {
+    $('aiHist').innerHTML = S.aiLog.length
+      ? `<tr><th>날짜</th>${ENG.map(e => `<th>${e[0]}</th>`).join('')}</tr>` + S.aiLog.slice().reverse().map(l => `<tr><td>${l.date}</td>${ENG.map((_, j) => `<td>${l.hits[j]}/${l.total}</td>`).join('')}</tr>`).join('')
+      : '<tr><td class="hint">아직 기록이 없습니다.</td></tr>';
+  };
+  renderHist();
+  $('aiSave').onclick = () => {
+    const hits = ENG.map((_, j) => document.querySelectorAll(`#aiTable input[data-e="${j}"]:checked`).length);
+    S.aiLog.push({ date: new Date().toISOString().slice(0, 10), total: qs.length, hits }); save(); renderHist();
+    document.querySelectorAll('#aiTable input').forEach(x => x.checked = false);
+  };
+
+  // 정보 복사
+  const nap = [
+    ['상호', R.name], ['영문 상호', R.nameEn], ['주소', addr], ['전화', R.phone],
+    ['영업시간', R.hours.map(h => h.days.join('·') + ' ' + h.open + '~' + h.close).join(', ') + ' / ' + R.hoursNote],
+    ['소개 (짧게)', R.seo.description], ['소개 (길게)', R.description], ['홈페이지', R.site.url],
+  ];
+  $('napList').innerHTML = nap.map(([k, v], i) => `<div class="card"><div class="hint">${esc(k)}</div><textarea id="nap${i}" style="min-height:0" rows="2" readonly>${esc(v)}</textarea><div class="btns"><button class="b" data-copy="nap${i}">복사</button></div></div>`).join('');
+}
+</script>
+</body>
+</html>
