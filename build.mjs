@@ -63,6 +63,11 @@ const mapLinks = [
 
 const ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const byDay = Object.fromEntries(ORDER.map(d => [d, r.hours.filter(h => h.days.includes(d)).map(h => [h.open, h.close])]));
+const dayRange = ds => ds.length > 2 && ds.every((d, i) => i === 0 || ORDER.indexOf(d) === ORDER.indexOf(ds[i - 1]) + 1)
+  ? `${DAY[ds[0]][1]}–${DAY[ds.at(-1)][1]}` : ds.map(d => DAY[d][1]).join('·');
+const schedule = Object.values(ORDER.reduce((m, d) => {
+  const k = JSON.stringify(byDay[d]); (m[k] ||= { days: [], times: byDay[d] }).days.push(d); return m;
+}, {})).map(g => ({ days: g.days, label: dayRange(g.days), text: g.times.length ? g.times.map(([o, c]) => `${o}–${c}`).join(' · ') : '휴무', off: !g.times.length }));
 const hanja = r.nameHanja || r.name;
 const dishes = r.menu.flatMap(s => s.items).filter(i => i.photo);
 const readJson = p => { try { return JSON.parse(readFileSync(p, 'utf8')); } catch { return null; } };
@@ -212,13 +217,13 @@ h3{font-family:var(--batang);font-weight:400;font-size:18px;color:var(--on-onggi
 .menu .d{grid-column:1/-1;font-size:14px;color:var(--on-onggi-soft);line-height:1.55;margin-top:2px}
 .menu .sig{display:inline-block;margin-left:var(--s2);padding:1px 6px;border-radius:3px;background:var(--seal);color:var(--on-seal);font-size:12px;font-weight:700;vertical-align:2px}
 
-.week{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,1fr);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
-.week li{padding:var(--s3) var(--s1);text-align:center;font-size:13px;line-height:1.45;font-variant-numeric:tabular-nums;border-left:1px solid var(--rule);color:var(--on-onggi-soft)}
-.week li:first-child{border-left:0}
-.week b{display:block;font-family:var(--batang);font-size:17px;color:var(--on-onggi);margin-bottom:var(--s1)}
-.week li.off{color:#ec7a62}
-.week li.today{background:var(--broth);color:var(--ink-soft)}
-.week li.today b{color:var(--ink)}
+.sched{margin:0;padding:0;display:grid;border-top:1px solid var(--rule)}
+.sched div{display:grid;grid-template-columns:4.2em 1fr;gap:var(--s3);align-items:baseline;padding:var(--s3) var(--s3);border-bottom:1px solid var(--rule);font-size:18px}
+.sched dt{font-family:var(--batang);font-weight:700}
+.sched dd{margin:0;font-variant-numeric:tabular-nums}
+.sched .off dd{color:#ec7a62;font-weight:600}
+.sched .today{background:var(--broth);color:var(--ink);border-radius:8px;border-bottom-color:transparent}
+.sched .today.off dd{color:#b0321c}
 .note{margin:var(--s4) 0 0;color:var(--on-onggi-soft);font-size:15px}
 
 .way{margin:0;display:grid;gap:var(--s4)}
@@ -237,7 +242,12 @@ summary .ico{transition:transform .3s var(--ease);color:var(--on-onggi-soft)}
 details[open] summary .ico{transform:rotate(45deg)}
 details p{margin:0 0 var(--s4);color:var(--on-onggi-soft);max-width:60ch}
 
-footer{margin-top:var(--s9);padding:var(--s7) 0 var(--s8);border-top:1px solid var(--rule);display:grid;gap:var(--s3)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:10;display:grid;grid-template-columns:1.4fr 1fr;gap:var(--s2);padding:var(--s2) var(--s3) calc(var(--s2) + env(safe-area-inset-bottom));background:rgba(28,20,15,.94);border-top:1px solid var(--rule);transform:translateY(110%);transition:transform .35s var(--ease)}
+.dock.on{transform:none}
+.dock a{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:999px;font-weight:700;text-decoration:none;border:1.5px solid var(--broth);color:var(--on-onggi)}
+.dock a:first-child{background:var(--broth);color:var(--ink)}
+@media (min-width:900px){.dock{display:none}}
+footer{margin-top:var(--s9);padding:var(--s7) 0 calc(var(--s8) + 72px);border-top:1px solid var(--rule);display:grid;gap:var(--s3)}
 footer .hanja{color:var(--on-onggi);font-size:56px}
 footer p{margin:0;color:var(--on-onggi-soft);font-size:15px}
 footer a{color:var(--on-onggi)}
@@ -286,8 +296,8 @@ ${[0, 1].map(col => `<div>${r.menu.filter((_, i) => (i % 2) === col).map((s, k) 
 <div class="cols">
 <div>
 <h2 id="h-hours">영업시간</h2>
-<ol class="week">${ORDER.map(d => `<li data-day="${d}"${byDay[d].length ? '' : ' class="off"'}><b>${DAY[d][1]}</b>${byDay[d].length ? byDay[d].map(([o, c]) => `${o}<br>~${c}`).join('<br>') : '휴무'}</li>`).join('')}</ol>
-<p class="note">${esc(r.hoursNote)}</p>
+<dl class="sched">${schedule.map(s => `<div data-days="${s.days.join(' ')}"${s.off ? ' class="off"' : ''}><dt>${esc(s.label)}</dt><dd>${esc(s.text)}</dd></div>`).join('')}</dl>
+<p class="note">${r.lastOrder ? `라스트오더 ${esc(r.lastOrder)}` : esc(r.hoursNote)}</p>
 </div>
 <div>
 <h2>찾아오는 길</h2>
@@ -327,6 +337,7 @@ ${r.faq.map(f => `<details><summary>${esc(f.q)}${plus}</summary><p>${esc(f.a)}</
 <p>${esc(r.name)}${r.nameEn ? ' · ' + esc(r.nameEn) : ''} · ${esc(fullAddr)} · <a href="${esc(telHref)}">${esc(r.phone)}</a></p>
 <p>${[...mapLinks, ...(r.links.instagram ? [['인스타그램', r.links.instagram]] : [])].map(([t, u]) => `<a href="${esc(u)}" rel="noopener">${t}</a>`).join(' · ')}</p>
 </footer>
+<nav class="dock" aria-label="빠른 길찾기"><a href="${esc(mapLinks[0][1])}" rel="noopener">길찾기</a><a href="${esc(telHref)}">전화</a></nav>
 </main>
 
 <script>
@@ -335,7 +346,10 @@ ${r.faq.map(f => `<details><summary>${esc(f.q)}${plus}</summary><p>${esc(f.a)}</
   const H = ${JSON.stringify(byDay)}, ORDER = ${JSON.stringify(ORDER)}, KO = ${JSON.stringify(ORDER.map(d => DAY[d][1]))}, LAST = ${JSON.stringify(r.lastOrder || '')};
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).map(p => [p.type, p.value]));
   const di = ORDER.indexOf(parts.weekday.slice(0, 2)), now = parts.hour + ':' + parts.minute;
-  document.querySelector('.week [data-day="' + ORDER[di] + '"]')?.classList.add('today');
+  document.querySelector('.sched [data-days~="' + ORDER[di] + '"]')?.classList.add('today');
+  // 길찾기 버튼이 화면 위로 지나가면 아래 고정 막대 표시
+  const dock = document.querySelector('.dock'), maps = document.querySelector('.maps');
+  if (dock && maps && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => dock.classList.toggle('on', !e.isIntersecting && e.boundingClientRect.top < 0)).observe(maps);
   const el = document.getElementById('status'), today = H[ORDER[di]] || [];
   const next = () => { for (let k = 1; k <= 7; k++) { const d = ORDER[(di + k) % 7]; if (H[d].length) return (k === 1 ? '내일' : KO[(di + k) % 7] + '요일') + ' ' + H[d][0][0]; } return ''; };
   let t;
