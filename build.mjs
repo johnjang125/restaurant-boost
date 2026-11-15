@@ -30,7 +30,7 @@ const jsonLd = [
     telephone: r.phone,
     priceRange: r.priceRange,
     servesCuisine: r.servesCuisine,
-    image: r.site.ogImage || undefined,
+    image: [r.site.ogImage, ...r.menu.flatMap(s => s.items).filter(i => i.photo).map(i => base + i.photo)].filter(Boolean),
     address: { '@type': 'PostalAddress', streetAddress: r.address.street, addressLocality: r.address.locality, addressRegion: r.address.region, postalCode: r.address.postalCode || undefined, addressCountry: r.address.country },
     geo: { '@type': 'GeoCoordinates', latitude: r.geo.lat, longitude: r.geo.lng },
     openingHoursSpecification: r.hours.map(h => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: h.days.map(d => 'https://schema.org/' + DAY[d][0]), opens: h.open, closes: h.close })),
@@ -39,7 +39,7 @@ const jsonLd = [
       '@type': 'Menu',
       hasMenuSection: r.menu.map(s => ({
         '@type': 'MenuSection', name: s.section,
-        hasMenuItem: s.items.map(i => ({ '@type': 'MenuItem', name: i.name, description: i.description, offers: { '@type': 'Offer', price: i.price, priceCurrency: 'KRW' } })),
+        hasMenuItem: s.items.map(i => ({ '@type': 'MenuItem', name: i.name, description: i.description, image: i.photo ? base + i.photo : undefined, offers: { '@type': 'Offer', price: i.price, priceCurrency: 'KRW' } })),
       })),
     },
     sameAs: sameAs.length ? sameAs : undefined,
@@ -63,6 +63,7 @@ const mapLinks = [
 const ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 const byDay = Object.fromEntries(ORDER.map(d => [d, r.hours.filter(h => h.days.includes(d)).map(h => [h.open, h.close])]));
 const hanja = r.nameHanja || r.name;
+const dishes = r.menu.flatMap(s => s.items).filter(i => i.photo);
 const telHref = 'tel:' + r.phone.replace(/[^0-9+]/g, '');
 const glaze = `url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .78 0 0 0 0 .62 0 0 0 0 .46 0 0 0 .16 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>')}")`;
 const plus = '<svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -160,6 +161,16 @@ h1{font-family:var(--batang);font-weight:700;font-size:clamp(20px,5.2vw,26px);ma
   .tagline{font-size:clamp(30px,3vw,40px)}
 }
 
+/* 그릇 줄: 흰 상 위에 놓인 대표 그릇들 */
+.dishes{list-style:none;margin:0 calc(var(--s4) * -1) var(--s7);padding:0 var(--s4) var(--s2);display:grid;grid-auto-flow:column;grid-auto-columns:68%;gap:var(--s3);overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.dishes::-webkit-scrollbar{display:none}
+.dishes li{scroll-snap-align:start}
+.dishes img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border-radius:10px;background:var(--broth)}
+.dishes p{margin:var(--s3) 0 0;display:flex;justify-content:space-between;gap:var(--s3);font-weight:600}
+.dishes span{font-variant-numeric:tabular-nums;color:var(--on-onggi-soft);font-weight:500}
+@media (min-width:900px){.dishes{grid-auto-flow:row;grid-template-columns:repeat(5,1fr);margin:0 0 var(--s7);padding:0;overflow:visible}}
+.story{display:block;width:100%;height:auto;border-radius:10px;margin:var(--s6) 0 0}
+
 /* 본문 */
 section{padding:var(--s8) 0 0}
 h2{font-family:var(--batang);font-weight:700;font-size:clamp(26px,6vw,34px);margin:0 0 var(--s5);letter-spacing:.04em}
@@ -237,6 +248,7 @@ footer a{color:var(--on-onggi)}
 
 <section id="menu" aria-labelledby="h-menu">
 <h2 id="h-menu">메뉴</h2>
+${dishes.length ? `<ul class="dishes">${dishes.map(i => `<li><img src="${esc(i.photo)}" alt="${esc(i.name)} 사진" width="640" height="640" loading="lazy" decoding="async"><p>${esc(i.name)}<span>${won(i.price)}</span></p></li>`).join('')}</ul>` : ''}
 <div class="cols">
 ${[0, 1].map(col => `<div>${r.menu.filter((_, i) => (i % 2) === col).map((s, k) => `<h3${k === 0 ? ' style="margin-top:0"' : ''}>${esc(s.section)}</h3>
 <ul class="menu">${s.items.map(i => `<li><span class="n">${esc(i.name)}${i.signature ? '<span class="sig">대표</span>' : ''}</span><span class="p">${won(i.price)}</span>${i.description ? `<span class="d">${esc(i.description)}</span>` : ''}</li>`).join('')}</ul>`).join('\n')}</div>`).join('\n')}
@@ -264,6 +276,7 @@ ${[0, 1].map(col => `<div>${r.menu.filter((_, i) => (i % 2) === col).map((s, k) 
 <section id="about" aria-labelledby="h-about">
 <h2 id="h-about">가게 이야기</h2>
 <p class="about">${esc(r.description)}</p>
+${r.site.storyImage ? `<img class="story" src="${esc(r.site.storyImage)}" alt="${esc(r.name)} 상차림" width="1280" height="1195" loading="lazy" decoding="async">` : ''}
 <p class="feats">${r.features.map(esc).join(' · ')}</p>
 </section>
 

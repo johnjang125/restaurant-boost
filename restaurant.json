@@ -85,18 +85,21 @@
           "name": "설렁탕",
           "price": 12000,
           "description": "매일 직접 12시간 끓인 사골국에 호주산 청정고기를 더했습니다.",
-          "signature": true
+          "signature": true,
+          "photo": "images/seolleongtang.jpg"
         },
         {
           "name": "도가니탕(스지)",
           "price": 16000,
           "description": "12시간 끓인 사골국에 3시간 삶은 쫄깃한 스지도가니를 더했습니다.",
-          "signature": true
+          "signature": true,
+          "photo": "images/dogani.jpg"
         },
         {
           "name": "얼큰설렁탕",
           "price": 13000,
-          "description": "직접 볶은 양념장과 함께 끓인 얼큰한 설렁탕. 신라면보다 한 단계 더 맵습니다."
+          "description": "직접 볶은 양념장과 함께 끓인 얼큰한 설렁탕. 신라면보다 한 단계 더 맵습니다.",
+          "photo": "images/eolkeun.jpg"
         },
         {
           "name": "(특) 얼큰설렁탕",
@@ -126,7 +129,8 @@
         {
           "name": "모둠수육 (2~3인)",
           "price": 38000,
-          "description": "아롱사태, 차돌박이, 스지 등이 들어간 부드러운 수육."
+          "description": "아롱사태, 차돌박이, 스지 등이 들어간 부드러운 수육.",
+          "photo": "images/modum.jpg"
         },
         {
           "name": "모둠수육 (3~4인)",
@@ -141,7 +145,8 @@
         {
           "name": "메밀 왕만두 4알",
           "price": 7500,
-          "description": "돼지고기와 채소로 속을 꽉 채운 메밀 만두."
+          "description": "돼지고기와 채소로 속을 꽉 채운 메밀 만두.",
+          "photo": "images/mandu.jpg"
         }
       ]
     },
@@ -239,6 +244,7 @@
     "url": "https://johnjang125.github.io/restaurant-boost/",
     "ogImage": "https://johnjang125.github.io/restaurant-boost/images/og.jpg",
     "naverVerification": "",
-    "googleVerification": ""
+    "googleVerification": "",
+    "storyImage": "images/table.jpg"
   }
 }
