@@ -341,13 +341,13 @@ ${r.faq.map(f => `<details><summary>${esc(f.q)}${plus}</summary><p>${esc(f.a)}</
   const dock = document.querySelector('.dock'), maps = document.querySelector('.maps');
   if (dock && maps && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => dock.classList.toggle('on', !e.isIntersecting && e.boundingClientRect.top < 0)).observe(maps);
   const el = document.getElementById('status'), today = H[ORDER[di]] || [];
-  const next = () => { for (let k = 1; k <= 7; k++) { const d = ORDER[(di + k) % 7]; if (H[d].length) return (k === 1 ? '내일' : KO[(di + k) % 7] + '요일') + ' ' + H[d][0][0]; } return ''; };
+  const next = () => { for (let k = 1; k <= 7; k++) { const d = ORDER[(di + k) % 7]; if (H[d].length) return KO[(di + k) % 7] + '요일 ' + H[d][0][0] + ' 영업'; } return ''; };
   let t;
   const cur = today.find(([o, c]) => now >= o && now < c);
-  if (cur) { t = '지금 영업 중' + (LAST && now < LAST ? ' · 라스트오더 ' + LAST : ''); el.dataset.open = '1'; }
-  else if (!today.length) t = '오늘 휴무 · ' + next() + ' 열어요';
-  else if (now < today[0][0]) t = '영업 전 · ' + today[0][0] + ' 열어요';
-  else { const later = today.find(([o]) => now < o); t = later ? '브레이크타임 · ' + later[0] + ' 다시 열어요' : '오늘 영업 끝 · ' + next() + ' 열어요'; }
+  if (cur) { t = '영업 중' + (LAST && now < LAST ? ' · 라스트오더 ' + LAST : ''); el.dataset.open = '1'; }
+  else if (!today.length) t = '오늘 휴무 · ' + next();
+  else if (now < today[0][0]) t = today[0][0] + ' 영업 시작';
+  else { const later = today.find(([o]) => now < o), prev = today.filter(([, c]) => c <= now).at(-1); t = later ? '브레이크타임 ' + prev[1] + '–' + later[0] : '영업 종료 · ' + next(); }
   el.textContent = t;
   const TERMS = ${JSON.stringify(TERMS)}, m = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', month: 'numeric' }).format(new Date()), d = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', day: 'numeric' }).format(new Date());
   const tm = [...TERMS].reverse().find(([a, b]) => m > a || (m === a && d >= b)) || TERMS.at(-1), se = document.getElementById('season');
