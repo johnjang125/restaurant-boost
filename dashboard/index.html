@@ -109,6 +109,8 @@ S.todo ??= {}; S.aiLog ??= [];
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const KDAY = { Mo: '월', Tu: '화', We: '수', Th: '목', Fr: '금', Sa: '토', Su: '일' };
+const hoursText = R => Object.entries(R.hours.reduce((m, h) => { const k = h.days.map(x => KDAY[x]).join('·'); (m[k] ||= []).push(h.open + '~' + h.close); return m; }, {})).map(([k, t]) => k + ' ' + t.join(', '));
 const won = n => n.toLocaleString('ko-KR') + '원';
 
 document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
@@ -209,19 +211,20 @@ function init(R) {
     const it = items[$('cItem').value], topic = $('cTopic').value, note = $('cNote').value.trim();
     const head = { sig: `${R.area}에서 ${R.category} 찾으면 여기 🍲`, new: `신메뉴 나왔어요! ${it.name}`, today: `오늘의 한 그릇, ${it.name}`, event: note || `${R.name} 소식`, season: `이 계절에만, ${it.name}` }[topic];
     const tags = [...R.keywords, R.name, it.name, R.area + '맛집', R.address.locality + '맛집'].map(tag);
-    $('igOut').value = `${head}\n\n${it.name} ${won(it.price)}\n${it.description || ''}\n${note && topic !== 'event' ? '\n' + note + '\n' : ''}\n📍 ${addr}\n🕘 ${R.hours.map(h => h.open + '~' + h.close).join(' / ')} (${R.hoursNote})\n📞 ${R.phone}\n\n${[...new Set(tags)].join(' ')}`;
+    $('igOut').value = `${head}\n\n${it.name} ${won(it.price)}\n${it.description || ''}\n${note && topic !== 'event' ? '\n' + note + '\n' : ''}\n📍 ${addr}\n🕘 ${hoursText(R).join(' / ')}
+${R.hoursNote}\n📞 ${R.phone}\n\n${[...new Set(tags)].join(' ')}`;
     $('blogOut').value = `제목: [${R.area} ${R.category}] ${R.name} ${it.name} — ${R.tagline}\n\n` +
       `■ 가게 소개\n${R.description}\n\n` +
       `■ 위치·찾아오기\n주소: ${addr}\n${R.directions}\n지도: ${R.links.naverPlace || '(네이버 플레이스 링크)'}\n\n` +
       `■ 오늘 소개할 메뉴: ${it.name} (${won(it.price)})\n${it.description || ''}\n${note ? note + '\n' : ''}[사진 3~5장: 메뉴 전체 → 가까이 → 먹는 장면]\n\n` +
       `■ 전체 메뉴\n${R.menu.map(s => s.section + '\n' + s.items.map(i => `- ${i.name} ${won(i.price)}`).join('\n')).join('\n')}\n\n` +
-      `■ 영업시간\n${R.hours.map(h => h.days.join('·') + ' ' + h.open + '~' + h.close).join('\n')}\n${R.hoursNote}\n\n` +
+      `■ 영업시간\n${hoursText(R).join('\n')}\n${R.hoursNote}\n\n` +
       `■ 자주 묻는 질문\n${R.faq.map(f => `Q. ${f.q}\nA. ${f.a}`).join('\n\n')}\n\n` +
       `태그: ${R.keywords.join(', ')}`;
     $('aiOut').value = `아래 식당 정보로 ${topic === 'event' ? '공지' : '홍보'}글을 써 줘.\n` +
       `1) 인스타그램 캡션: 300자 이내, 첫 줄에 눈길 끄는 문장, 해시태그 10개 이내\n2) 네이버 블로그 글: 1,500자 안팎, 사장님 1인칭, 소제목 4개, 위치·가격·영업시간 포함\n` +
       `규칙: 아래 정보에 없는 사실(수상, 방송 출연, "최고" 같은 비교)은 지어내지 말 것. 과장 광고 표현 금지.\n\n` +
-      `가게: ${R.name} (${R.category}, ${R.area})\n소개: ${R.description}\n주소: ${addr}\n영업: ${R.hours.map(h => h.days.join('·') + ' ' + h.open + '~' + h.close).join(', ')} / ${R.hoursNote}\n` +
+      `가게: ${R.name} (${R.category}, ${R.area})\n소개: ${R.description}\n주소: ${addr}\n영업: ${hoursText(R).join(' / ')} / ${R.hoursNote}\n` +
       `특징: ${R.features.join(', ')}\n주제 메뉴: ${it.name} ${won(it.price)} — ${it.description || ''}\n${note ? '메모: ' + note + '\n' : ''}키워드: ${R.keywords.join(', ')}`;
   };
   ['cItem', 'cTopic', 'cNote'].forEach(id => $(id).oninput = gen);
@@ -264,7 +267,7 @@ function init(R) {
   // 정보 복사
   const nap = [
     ['상호', R.name], ['영문 상호', R.nameEn], ['주소', addr], ['전화', R.phone],
-    ['영업시간', R.hours.map(h => h.days.join('·') + ' ' + h.open + '~' + h.close).join(', ') + ' / ' + R.hoursNote],
+    ['영업시간', hoursText(R).join(' / ') + ' / ' + R.hoursNote],
     ['소개 (짧게)', R.seo.description], ['소개 (길게)', R.description], ['홈페이지', R.site.url],
   ];
   $('napList').innerHTML = nap.map(([k, v], i) => `<div class="card"><div class="hint">${esc(k)}</div><textarea id="nap${i}" style="min-height:0" rows="2" readonly>${esc(v)}</textarea><div class="btns"><button class="b" data-copy="nap${i}">복사</button></div></div>`).join('');

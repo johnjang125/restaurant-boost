@@ -31,7 +31,7 @@ const jsonLd = [
     priceRange: r.priceRange,
     servesCuisine: r.servesCuisine,
     image: r.site.ogImage || undefined,
-    address: { '@type': 'PostalAddress', streetAddress: r.address.street, addressLocality: r.address.locality, addressRegion: r.address.region, postalCode: r.address.postalCode, addressCountry: r.address.country },
+    address: { '@type': 'PostalAddress', streetAddress: r.address.street, addressLocality: r.address.locality, addressRegion: r.address.region, postalCode: r.address.postalCode || undefined, addressCountry: r.address.country },
     geo: { '@type': 'GeoCoordinates', latitude: r.geo.lat, longitude: r.geo.lng },
     openingHoursSpecification: r.hours.map(h => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: h.days.map(d => 'https://schema.org/' + DAY[d][0]), opens: h.open, closes: h.close })),
     amenityFeature: r.features.map(f => ({ '@type': 'LocationFeatureSpecification', name: f, value: true })),
@@ -51,7 +51,9 @@ const jsonLd = [
   },
 ];
 
-const hoursText = r.hours.map(h => `${h.days.map(d => DAY[d][1]).join('·')} ${h.open}~${h.close}`);
+// 같은 요일 묶음은 한 줄로: "월·화·수·목·금 11:00~15:00, 17:00~20:30"
+const hoursGroups = r.hours.reduce((m, h) => { const k = h.days.map(d => DAY[d][1]).join('·'); (m[k] ||= []).push(h.open + '~' + h.close); return m; }, {});
+const hoursText = Object.entries(hoursGroups).map(([d, t]) => d + ' ' + t.join(', '));
 const mapLinks = [
   ['네이버 지도', r.links.naverPlace || `https://map.naver.com/p/search/${encodeURIComponent(r.name)}`],
   ['카카오맵', r.links.kakaoMap || `https://map.kakao.com/?q=${encodeURIComponent(r.name)}`],
