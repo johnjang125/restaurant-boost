@@ -62,7 +62,7 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
   await page.goto(origin + '/', { waitUntil: 'networkidle' });
   // 늦게 뜨는 사진(옆으로 넘기는 줄 포함)까지 모두 불러오기
   await page.evaluate(() => document.querySelectorAll('img[loading=lazy]').forEach(i => { i.loading = 'eager'; }));
-  await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += innerHeight / 2) { scrollTo(0, y); await new Promise(r => setTimeout(r, 60)); } scrollTo(0, 0); });
+  await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += innerHeight / 2) { scrollTo({ top: y, behavior: "instant" }); await new Promise(r => setTimeout(r, 60)); } scrollTo({ top: 0, behavior: "instant" }); });
   await page.waitForLoadState('networkidle');
   await page.evaluate(() => document.fonts.ready);
 
@@ -89,7 +89,7 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
     const noAlt = [...document.images].filter(i => !i.hasAttribute('alt')).map(i => i.getAttribute('src'));
     const ld = [...document.querySelectorAll('script[type="application/ld+json"]')].flatMap(s => { try { return [JSON.parse(s.textContent)].flat().flatMap(x => x['@graph'] || [x]); } catch { return [null]; } });
     return {
-      overflow: document.documentElement.scrollWidth - innerWidth,
+      overflow: document.documentElement.scrollWidth - innerWidth, innerWidth,
       h1: document.querySelectorAll('h1').length,
       title: document.title, desc: document.querySelector('meta[name=description]')?.content || '',
       canonical: document.querySelector('link[rel=canonical]')?.href || '', ogImage: document.querySelector('meta[property="og:image"]')?.content || '',
@@ -100,6 +100,8 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
 
   const tag = vpName === 'mobile' ? '휴대폰' : '컴퓨터';
   m.overflow > 1 ? fail(`${tag}: 화면이 옆으로 ${m.overflow}px 넘침`) : ok(`${tag}: 가로 넘침 없음`);
+  // 내용이 넓으면 휴대폰 브라우저가 페이지 전체를 축소해 버림 (넘침 검사에 안 잡힘)
+  m.innerWidth !== vp.viewport.width ? fail(`${tag}: 페이지가 ${m.innerWidth}px 폭으로 축소됨 (화면 ${vp.viewport.width}px보다 넓은 요소가 있음)`) : ok(`${tag}: 축소 없음`);
   consoleErrors.length ? fail(`${tag}: 스크립트 오류 ${consoleErrors.length}건 — ${consoleErrors[0].slice(0, 120)}`) : ok(`${tag}: 스크립트 오류 없음`);
   badRequests.length ? fail(`${tag}: 불러오지 못한 파일 ${badRequests.join(', ')}`) : ok(`${tag}: 모든 파일 불러옴`);
   m.brokenImgs.length ? fail(`${tag}: 깨진 사진 ${m.brokenImgs.join(', ')}`) : ok(`${tag}: 깨진 사진 없음`);

@@ -120,7 +120,17 @@ ${r.site.ogImage ? `<meta property="og:image" content="${esc(r.site.ogImage)}">`
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html{scrollbar-color:var(--glaze) var(--onggi)}
+html{scrollbar-color:var(--glaze) var(--onggi);scroll-padding-top:64px}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+
+.top{position:sticky;top:0;z-index:20;background:rgba(28,20,15,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);min-height:52px}
+.top .logo{font-family:var(--brush);font-size:26px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;transition:opacity .3s var(--ease)}
+.top.hide-logo .logo{opacity:0;pointer-events:none}
+.top ul{list-style:none;margin:0;padding:0;display:flex}
+.top ul a{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s2);font-size:15px;font-weight:600;text-decoration:none;color:var(--on-onggi-soft);white-space:nowrap}
+.top ul a:hover{color:var(--on-onggi)}
+@media (min-width:900px){.top ul a{padding:0 var(--s4);font-size:16px}}
 body{margin:0;background:var(--onggi) url(images/grain.jpg) 0 0/320px auto;color:var(--on-onggi);font:17px/1.7 var(--sans);word-break:keep-all;-webkit-font-smoothing:antialiased}
 ::selection{background:var(--seal);color:var(--on-seal)}
 a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
@@ -144,6 +154,12 @@ h1{font-family:var(--batang);font-weight:700;font-size:clamp(28px,7vw,36px);marg
 .name{display:grid;gap:var(--s2);justify-items:inherit}
 
 .go{display:grid;gap:var(--s4);justify-items:center;text-align:center}
+@media (max-width:899px){
+  .hero{padding-top:var(--s4);grid-template-columns:minmax(0,1fr)}
+  .plate{display:block;position:relative;margin-right:calc(var(--s4) * -1);overflow-x:clip}
+  .plate .bowl{width:122vw;max-width:none;margin-left:12vw}
+  .plate .hanja{position:absolute;left:0;top:var(--s2);z-index:1;font-size:clamp(52px,15vw,84px);text-shadow:0 2px 12px rgba(0,0,0,.7)}
+}
 .tagline{font-family:var(--batang);font-size:clamp(22px,5.6vw,34px);line-height:1.35;margin:0;max-width:16em;text-wrap:balance}
 .addr{margin:0;color:var(--on-onggi-soft);font-size:16px}
 .maps{display:grid;gap:var(--s2);width:100%;max-width:420px}
@@ -249,6 +265,10 @@ footer a{color:var(--on-onggi)}
 </style>
 </head>
 <body>
+<nav class="top hide-logo" aria-label="바로가기"><div class="wrap">
+<a class="logo" href="#" lang="zh-Hant" aria-label="${esc(r.name)} 맨 위로">${esc(hanja)}</a>
+<ul><li><a href="#menu">메뉴</a></li><li><a href="#hours">영업시간</a></li><li><a href="#way">오시는 길</a></li>${reviews ? '<li><a href="#reviews">후기</a></li>' : ''}</ul>
+</div></nav>
 <main class="wrap">
 
 <header class="hero">
@@ -290,7 +310,7 @@ ${[0, 1].map(col => `<div>${r.menu.filter((_, i) => (i % 2) === col).map((s, k) 
 <dl class="sched">${schedule.map(s => `<div data-days="${s.days.join(' ')}"${s.off ? ' class="off"' : ''}><dt>${esc(s.label)}</dt><dd>${esc(s.text)}</dd></div>`).join('')}</dl>
 <p class="note">${r.lastOrder ? `라스트오더 ${esc(r.lastOrder)}` : esc(r.hoursNote)}</p>
 </div>
-<div>
+<div id="way">
 <h2>찾아오는 길</h2>
 <dl class="way">
 <div><dt>주소</dt><dd>${esc(fullAddr)}</dd></div>
@@ -339,8 +359,12 @@ ${r.faq.map(f => `<details><summary>${esc(f.q)}${plus}</summary><p>${esc(f.a)}</
   const di = ORDER.indexOf(parts.weekday.slice(0, 2)), now = parts.hour + ':' + parts.minute;
   document.querySelector('.sched [data-days~="' + ORDER[di] + '"]')?.classList.add('today');
   // 길찾기 버튼이 화면 위로 지나가면 아래 고정 막대 표시
+  // 큰 붓글씨 상호가 화면에서 사라지면 위 막대에 작은 상호 표시
+  const top = document.querySelector('.top'), big = document.querySelector('.plate .hanja');
+  if (top && big && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => top.classList.toggle('hide-logo', e.isIntersecting)).observe(big);
+  else top?.classList.remove('hide-logo');
   const dock = document.querySelector('.dock'), maps = document.querySelector('.maps');
-  if (dock && maps && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => dock.classList.toggle('on', !e.isIntersecting && e.boundingClientRect.top < 0)).observe(maps);
+  if (dock && maps && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => dock.classList.toggle('on', e.intersectionRatio < .5), { threshold: [0, .5, 1] }).observe(maps);
   const el = document.getElementById('status'), today = H[ORDER[di]] || [];
   const next = () => { for (let k = 1; k <= 7; k++) { const d = ORDER[(di + k) % 7]; if (H[d].length) return KO[(di + k) % 7] + '요일 ' + H[d][0][0] + ' 영업'; } return ''; };
   let t;
