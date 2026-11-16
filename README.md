@@ -86,3 +86,12 @@ public/                 사진 등 그대로 복사될 파일 (public/posts/ = �
 scripts/                인스타 게시, AI 연결 자리
 .github/workflows/      푸시하면 GitHub Pages로 자동 배포
 ```
+
+## 품질 점검과 레퍼런스 분석
+
+처음 한 번 `npm install` (Edge나 Chrome이 깔려 있으면 브라우저를 따로 받지 않음).
+
+- `npm run check`: site/를 휴대폰·컴퓨터 화면으로 열어 점검. 가로 넘침, 깨진 사진, 스크립트 오류, 글자 대비, 버튼 크기, 제목·설명문, 구조화 데이터, 화면 가격·전화번호가 restaurant.json과 맞는지. 처음 돌리면 지금 화면을 기준으로 저장하고, 다음부터는 기준과 달라진 곳을 check-out/*-diff.png에 빨갛게 표시.
+- `npm run check:update`: 디자인을 일부러 바꾼 뒤 새 기준으로 저장.
+- 배포(GitHub Actions)에서도 화면 비교만 빼고 같은 점검이 돌고, 문제(✗)가 있으면 배포가 멈춤.
+- `npm run refs`: scripts/refs.json의 레퍼런스 식당 사이트를 휴대폰·컴퓨터로 열어 첫 화면 사진 비중, 글자 수, 전화·지도·예약 버튼, 글꼴, 구조화 데이터, 용량을 재서 refs-out/report.md로 정리. 사이트를 더하려면 refs.json에 한 줄 추가.

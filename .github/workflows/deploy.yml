@@ -25,6 +25,10 @@ jobs:
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
       - run: node build.mjs
+      # 화면·검색 정보 점검. 문제가 있으면 여기서 멈추고 배포하지 않음
+      - run: npm ci --no-audit --no-fund
+      - run: node scripts/check.mjs --no-visual --verbose
+        env: { BROWSER_CHANNEL: chrome }
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with: { path: site }

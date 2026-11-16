@@ -1,0 +1,11 @@
+[
+  { "name": "kangseolok", "url": "https://johnjang125.github.io/restaurant-boost/", "note": "우리 사이트 (비교 기준)" },
+  { "name": "kikunoi", "url": "https://kikunoi.jp/", "note": "교토 가이세키. 검은 바탕 + 위에서 찍은 요리 한 장, 세로 붓글씨" },
+  { "name": "cote", "url": "https://www.cotenyc.com/", "note": "뉴욕 한국식 스테이크하우스. 어두운 상차림, 창살 귀퉁이" },
+  { "name": "jua", "url": "https://www.juanyc.com/", "note": "뉴욕 한식. 연기 영상 하나" },
+  { "name": "mingles", "url": "https://www.restaurant-mingles.com/", "note": "서울. 한지·회벽 재질 바탕" },
+  { "name": "onjium", "url": "https://onjium.org/", "note": "한식·한복·한옥 연구소. 흰 바탕 사진 격자" },
+  { "name": "jungsik", "url": "https://www.jungsik.com/", "note": "서울·뉴욕. 원형 문양 아이콘" },
+  { "name": "atomix", "url": "https://www.atomixnyc.com/", "note": "뉴욕 한식. 전통 직물 무늬" },
+  { "name": "hanilkwan", "url": "https://www.hanilkwan.co.kr/", "note": "1939년 노포. 옛 건물 스케치" }
+]

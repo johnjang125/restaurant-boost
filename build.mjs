@@ -93,6 +93,7 @@ const html = `<!doctype html>
 ${r.site.naverVerification ? `<meta name="naver-site-verification" content="${esc(r.site.naverVerification)}">` : ''}
 ${r.site.googleVerification ? `<meta name="google-site-verification" content="${esc(r.site.googleVerification)}">` : ''}
 <meta name="theme-color" content="#1c140f">
+<link rel="icon" href="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#0d0806"/><circle cx="32" cy="32" r="23" fill="#f0eadf"/></svg>')}">
 <meta property="og:type" content="restaurant">
 <meta property="og:title" content="${esc(r.seo.title)}">
 <meta property="og:description" content="${esc(r.seo.description)}">
@@ -154,7 +155,7 @@ h1{font-family:var(--batang);font-weight:700;font-size:clamp(28px,7vw,36px);marg
 .btn.primary{background:var(--broth);color:var(--ink)}
 .btn.primary:hover{background:#fff}
 .maps .pair{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
-.call{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;text-decoration:none;border-bottom:1px solid var(--glaze);padding-bottom:2px}
+.call{display:inline-flex;align-items:center;min-height:44px;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;text-decoration:underline;text-decoration-color:var(--glaze);text-underline-offset:.3em}
 .ico{width:16px;height:16px;flex:none}
 
 @media (min-width:900px){
@@ -190,7 +191,7 @@ h1{font-family:var(--batang);font-weight:700;font-size:clamp(28px,7vw,36px);marg
 .quotes blockquote{margin:0;font-family:var(--batang);font-size:17px;line-height:1.7}
 .quotes p{margin:var(--s2) 0 0;font-size:14px;color:var(--on-onggi-soft)}
 @media (min-width:900px){.quotes{display:grid;grid-template-columns:1fr 1fr;column-gap:var(--s7)}}
-.more{display:inline-block;margin-top:var(--s5);font-weight:700;color:var(--on-onggi)}
+.more{display:inline-flex;align-items:center;min-height:44px;margin-top:var(--s4);font-weight:700;color:var(--on-onggi)}
 .blog{list-style:none;margin:0;padding:0}
 .blog li{padding:var(--s3) 0;border-bottom:1px solid var(--rule)}
 .blog a{font-weight:700}

@@ -4,3 +4,6 @@
 node_modules/
 .impeccable/
 /compare-images/
+/refs-out/
+/check-out/
+/checks/
