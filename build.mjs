@@ -128,7 +128,7 @@ html{scrollbar-color:var(--glaze) var(--onggi);scroll-padding-top:64px}
 .top .logo{font-family:var(--brush);font-size:26px;line-height:1;text-decoration:none;display:inline-flex;align-items:center;min-height:44px;transition:opacity .3s var(--ease)}
 .top.hide-logo .logo{opacity:0;pointer-events:none}
 .top ul{list-style:none;margin:0;padding:0;display:flex}
-.top ul a{display:inline-flex;align-items:center;min-height:44px;padding:0 var(--s2);font-size:15px;font-weight:600;text-decoration:none;color:var(--on-onggi-soft);white-space:nowrap}
+.top ul a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 var(--s2);font-size:15px;font-weight:600;text-decoration:none;color:var(--on-onggi-soft);white-space:nowrap}
 .top ul a:hover{color:var(--on-onggi)}
 @media (min-width:900px){.top ul a{padding:0 var(--s4);font-size:16px}}
 body{margin:0;background:var(--onggi) url(images/grain.jpg) 0 0/320px auto;color:var(--on-onggi);font:17px/1.7 var(--sans);word-break:keep-all;-webkit-font-smoothing:antialiased}
