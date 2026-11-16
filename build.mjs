@@ -148,9 +148,6 @@ a{color:inherit;text-underline-offset:.22em;text-decoration-thickness:1px}
 .season b{color:var(--on-onggi);font-weight:700}
 h1{font-family:var(--batang);font-weight:700;font-size:clamp(28px,7vw,36px);margin:0;letter-spacing:.2em}
 .kind{margin:0;font-size:15px;color:var(--on-onggi-soft)}
-.status{margin:0;font-size:15px;font-weight:600;display:inline-flex;align-items:center;gap:var(--s2)}
-.status::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--on-onggi-soft)}
-.status[data-open="1"]::before{background:#57b979;box-shadow:0 0 0 3px rgba(87,185,121,.22)}
 .name{display:grid;gap:var(--s2);justify-items:inherit}
 
 .go{display:grid;gap:var(--s4);justify-items:center;text-align:center}
@@ -282,7 +279,6 @@ footer a{color:var(--on-onggi)}
 <p class="season" id="season"><span>절기</span><b>${term[2]}</b><span lang="zh-Hant">${term[3]}</span></p>
 <h1>${esc(r.name)}</h1>
 <p class="kind">${esc(r.servesCuisine.slice(1, 3).join("·"))} 전문점</p>
-<p class="status" id="status">${esc(hoursText.join(' / '))}</p>
 </div>
 <p class="tagline">${esc(r.tagline)}</p>
 <p class="addr">${esc(r.area)} · ${esc(fullAddr)}</p>
@@ -352,28 +348,19 @@ ${r.faq.map(f => `<details><summary>${esc(f.q)}${plus}</summary><p>${esc(f.a)}</
 </main>
 
 <script>
-// 지금 영업 상태 (서울 시간 기준)
+// 오늘 요일 표시·바로가기 막대·절기 (서울 시간 기준)
 (() => {
-  const H = ${JSON.stringify(byDay)}, ORDER = ${JSON.stringify(ORDER)}, KO = ${JSON.stringify(ORDER.map(d => DAY[d][1]))}, LAST = ${JSON.stringify(r.lastOrder || '')};
-  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', weekday: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date()).map(p => [p.type, p.value]));
-  const di = ORDER.indexOf(parts.weekday.slice(0, 2)), now = parts.hour + ':' + parts.minute;
+  const ORDER = ${JSON.stringify(ORDER)};
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul', weekday: 'short' }).formatToParts(new Date()).map(p => [p.type, p.value]));
+  const di = ORDER.indexOf(parts.weekday.slice(0, 2));
   document.querySelector('.sched [data-days~="' + ORDER[di] + '"]')?.classList.add('today');
-  // 길찾기 버튼이 화면 위로 지나가면 아래 고정 막대 표시
   // 큰 붓글씨 상호가 화면에서 사라지면 위 막대에 작은 상호 표시
   const top = document.querySelector('.top'), big = document.querySelector('.plate .hanja');
   if (top && big && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => top.classList.toggle('hide-logo', e.isIntersecting)).observe(big);
   else top?.classList.remove('hide-logo');
+  // 첫 화면 길찾기 버튼이 절반 넘게 안 보이면 아래 고정 막대 표시
   const dock = document.querySelector('.dock'), maps = document.querySelector('.maps');
   if (dock && maps && 'IntersectionObserver' in window) new IntersectionObserver(([e]) => dock.classList.toggle('on', e.intersectionRatio < .5), { threshold: [0, .5, 1] }).observe(maps);
-  const el = document.getElementById('status'), today = H[ORDER[di]] || [];
-  const next = () => { for (let k = 1; k <= 7; k++) { const d = ORDER[(di + k) % 7]; if (H[d].length) return KO[(di + k) % 7] + '요일 ' + H[d][0][0] + ' 영업'; } return ''; };
-  let t;
-  const cur = today.find(([o, c]) => now >= o && now < c);
-  if (cur) { t = '영업 중' + (LAST && now < LAST ? ' · 라스트오더 ' + LAST : ''); el.dataset.open = '1'; }
-  else if (!today.length) t = '오늘 휴무 · ' + next();
-  else if (now < today[0][0]) t = today[0][0] + ' 영업 시작';
-  else { const later = today.find(([o]) => now < o), prev = today.filter(([, c]) => c <= now).at(-1); t = later ? '브레이크타임 ' + prev[1] + '–' + later[0] : '영업 종료 · ' + next(); }
-  el.textContent = t;
   const TERMS = ${JSON.stringify(TERMS)}, m = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', month: 'numeric' }).format(new Date()), d = +new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', day: 'numeric' }).format(new Date());
   const tm = [...TERMS].reverse().find(([a, b]) => m > a || (m === a && d >= b)) || TERMS.at(-1), se = document.getElementById('season');
   if (se) { se.children[1].textContent = tm[2]; se.children[2].textContent = tm[3]; }
